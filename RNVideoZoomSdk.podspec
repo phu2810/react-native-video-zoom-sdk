@@ -1,8 +1,8 @@
 
 Pod::Spec.new do |s|
-  s.name         = "VideoZoomSDK"
+  s.name         = "RNVideoZoomSDK"
   s.version      = "1.0.0"
-  s.summary      = "VideoZoomSDK"
+  s.summary      = "RNVideoZoomSDK"
   s.description  = <<-DESC
                   React Native integration for Video Zoom SDK
                    DESC
