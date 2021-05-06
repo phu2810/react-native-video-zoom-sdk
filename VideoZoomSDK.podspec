@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.source_files  = "ios/*", "ios/src/**/*"
 
   s.dependency "React"
-
+  s.dependency "VideoZoom_SDK", '1.0.2'
 end
 
