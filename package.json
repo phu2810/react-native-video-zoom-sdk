@@ -6,6 +6,9 @@
   "main": "index.js",
   "scripts": {
   },
+  "files": [
+      "react-native-video-zoom-sdk.podspec"
+  ],
   "keywords": [
     "react-native",
     "zoom.us",
