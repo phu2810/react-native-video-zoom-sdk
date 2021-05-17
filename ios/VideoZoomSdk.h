@@ -1,5 +1,6 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
-@interface VideoZoomSdk : NSObject <RCTBridgeModule>
+@interface VideoZoomSdk : RCTEventEmitter <RCTBridgeModule>
 
 @end
