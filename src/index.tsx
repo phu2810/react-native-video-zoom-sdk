@@ -5,9 +5,9 @@ const { VideoZoomSdk } = NativeModules;
 const NativeVideoZoomView = requireNativeComponent('RNVideoZoomView');
 const eventEmitter = new NativeEventEmitter(VideoZoomSdk);
 let addListenEvent = false;
-let subscriptionEvent;
+let subscriptionEvent:any;
 
-const handleAppStateChange = (nextAppState) => {
+const handleAppStateChange = (nextAppState:string) => {
   VideoZoomSdk.appStateChange(nextAppState);
 };
 
@@ -17,13 +17,13 @@ export const initSdk = () => {
       addListenEvent = true;
       AppState.addEventListener("change", handleAppStateChange);
     }
-    VideoZoomSdk.initSDK((rs) => {
+    VideoZoomSdk.initSDK((rs:boolean) => {
       return res(rs);
     });
   });
 };
 
-export const joinMeeting = (meetingInfo) => {
+export const joinMeeting = (meetingInfo:object) => {
   VideoZoomSdk.joinMeeting(meetingInfo);
 };
 
@@ -50,13 +50,13 @@ export const switchCameraZoom = () => {
 
 export const getParticipants = () => {
   return new Promise((res) => {
-    VideoZoomSdk.getParticipants((rs) => {
+    VideoZoomSdk.getParticipants((rs:string) => {
       return res(rs);
     });
   });
 }
 
-export const getUserInfoZoom = (userId) => {
+export const getUserInfoZoom = () => {
 }
 
 export const onEventListenerZoom = (onEvent = () => {}) =>{
@@ -70,7 +70,7 @@ export const removeListenerZoom = () => {
   subscriptionEvent.remove();
 }
 
-const RNVideoZoomView = (props) => {
+const RNVideoZoomView = (props:any) => {
   return (
     <NativeVideoZoomView
       style={props.style}
