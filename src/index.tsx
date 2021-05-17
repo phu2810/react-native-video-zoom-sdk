@@ -50,8 +50,8 @@ export const switchCameraZoom = () => {
 
 export const getParticipants = () => {
   return new Promise((res) => {
-    VideoZoomSdk.getParticipants((rs:string) => {
-      return res(rs);
+    VideoZoomSdk.getParticipants((members: any) => {
+      return res({error: false, members});
     });
   });
 }
