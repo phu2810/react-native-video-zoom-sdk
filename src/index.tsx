@@ -71,6 +71,7 @@ export const removeListenerZoom = () => {
 }
 
 const RNVideoZoomView = (props:any) => {
+  // @ts-ignore
   return (
     <NativeVideoZoomView
       style={props.style}
