@@ -18,7 +18,6 @@ typedef void(^SendEventBlock)(NSDictionary *payload);
 @property (nonatomic, copy) SendEventBlock sendEventBlock;
 
 - (void) initSDK:(RCTResponseSenderBlock)callback;
-- (void) appStateChange:(NSString *) newState;
 - (void) joinMeeting:(NSDictionary *) meetingInfo;
 - (void) leaveSession;
 - (void) onOffMyAudio;

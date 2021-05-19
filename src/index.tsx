@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  AppState,
   NativeModules,
   requireNativeComponent,
   NativeEventEmitter
@@ -9,19 +8,10 @@ const { VideoZoomSdk } = NativeModules;
 
 const NativeVideoZoomView = requireNativeComponent('RNVideoZoomView');
 const eventEmitter = new NativeEventEmitter(VideoZoomSdk);
-let addListenEvent = false;
 let subscriptionEvent:any;
-
-const handleAppStateChange = (nextAppState:string) => {
-  VideoZoomSdk.appStateChange(nextAppState);
-};
 
 export const initSdk = () => {
   return new Promise((res) => {
-    if (!addListenEvent) {
-      addListenEvent = true;
-      AppState.addEventListener("change", handleAppStateChange);
-    }
     VideoZoomSdk.initSDK((rs:boolean) => {
       return res(rs);
     });

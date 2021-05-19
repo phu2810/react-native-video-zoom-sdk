@@ -14,11 +14,6 @@ RCT_EXPORT_METHOD(initSDK:(RCTResponseSenderBlock)callback)
     };
 }
 
-RCT_EXPORT_METHOD(appStateChange:(NSString*)newState)
-{
-    [[VideoZoomControl shared] appStateChange:newState];
-}
-
 RCT_EXPORT_METHOD(joinMeeting:(NSDictionary *) meetingInfo)
 {
     [[VideoZoomControl shared] joinMeeting:meetingInfo];

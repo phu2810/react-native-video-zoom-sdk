@@ -10,6 +10,7 @@
 
 @interface VideoZoomControl()<ZoomInstantSDKDelegate> {
     BOOL isInitSuccess;
+    BOOL listenAppState;
 }
 
 @property (nonatomic, strong) VideoZoomEventHandler *eventHandler;
@@ -32,12 +33,35 @@
     self = [super init];
     if (self) {
         isInitSuccess = NO;
+        listenAppState = NO;
         self.eventHandler = [VideoZoomEventHandler new];
     }
     return self;
 }
 - (void) initSDK:(RCTResponseSenderBlock)callback
 {
+    if (!listenAppState) {
+        listenAppState = YES;
+        
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(applicationWillResignActive)
+         name:UIApplicationWillResignActiveNotification
+         object:nil];
+        
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(applicationDidBecomeActive)
+         name:UIApplicationDidBecomeActiveNotification
+         object:nil];
+        
+        [[NSNotificationCenter defaultCenter]
+         addObserver:self
+         selector:@selector(applicationDidEnterBackground)
+         name:UIApplicationDidEnterBackgroundNotification
+         object:nil];
+    }
+    
     if (!isInitSuccess) {
         ZoomInstantSDKInitParams *context = [[ZoomInstantSDKInitParams alloc] init];
         context.domain = @"https://zoom.us";
@@ -52,17 +76,17 @@
         callback(@[@(1)]);
     }
 }
-- (void) appStateChange:(NSString *) newState {
-    if ([newState isEqualToString:@"inactive"]) {
-        [[ZoomInstantSDK shareInstance] appWillResignActive];
-    }
-    else if ([newState isEqualToString:@"background"]) {
-        [[ZoomInstantSDK shareInstance] appDidEnterBackgroud];
-    }
-    else if ([newState isEqualToString:@"active"]) {
-        [[ZoomInstantSDK shareInstance] appDidBecomeActive];
-    }
+
+- (void) applicationWillResignActive {
+    [[ZoomInstantSDK shareInstance] appWillResignActive];
 }
+- (void) applicationDidBecomeActive {
+    [[ZoomInstantSDK shareInstance] appDidBecomeActive];
+}
+- (void) applicationDidEnterBackground {
+    [[ZoomInstantSDK shareInstance] appDidEnterBackgroud];
+}
+
 - (void) joinMeeting:(NSDictionary *) meetingInfo {
     NSString *topic = meetingInfo[@"topic"] ?: @"topic";
     NSString *userName = meetingInfo[@"userName"] ?: @"userName";
@@ -159,5 +183,8 @@
     if (self.sendEventBlock) {
         self.sendEventBlock(payload);
     }
+}
+- (void) dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 @end
