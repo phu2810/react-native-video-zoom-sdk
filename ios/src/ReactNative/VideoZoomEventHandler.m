@@ -22,7 +22,8 @@
 //        ZoomInstantSDKUser *user = userArr[i];
 //        NSLog(@"+++ onSessionJoin: %@ - %@", [user getUserName], [user getUserId]);
 //    }
-    [[VideoZoomControl shared] sendEvent:@{@"event": @"onSessionJoin"}];
+    [[VideoZoomControl shared] sendEvent:@{@"des": @"meeting_ready"}];
+    [[[ZoomInstantSDK shareInstance] getVideoHelper] rotateMyVideo:UIDeviceOrientationPortrait];
 }
 
 /*!
@@ -50,11 +51,14 @@
  */
 - (void)onUserJoin:(ZoomInstantSDKUserHelper *)helper users:(NSArray <ZoomInstantSDKUser *>*)userArray
 {
-    [[VideoZoomControl shared] sendEvent:@{@"event": @"onUserJoin"}];
     OWSLogVerbose(@"");
     for (int i = 0; i < userArray.count; i++) {
         ZoomInstantSDKUser *user = userArray[i];
-        NSLog(@"+++ onUserJoin: %@ - %@", [user getUserName], [user getUserId]);
+        [[VideoZoomControl shared] sendEvent:@{
+            @"event": @"sinkMeetingUserJoin",
+            @"userID": [user getUserId],
+            @"userName": [user getUserName],
+        }];
     }
 }
 
@@ -64,11 +68,14 @@
  */
 - (void)onUserLeave:(ZoomInstantSDKUserHelper *)helper users:(NSArray <ZoomInstantSDKUser *>*)userArray
 {
-    [[VideoZoomControl shared] sendEvent:@{@"event": @"onUserLeave"}];
     OWSLogVerbose(@"");
     for (int i = 0; i < userArray.count; i++) {
         ZoomInstantSDKUser *user = userArray[i];
-        NSLog(@"+++ onUserLeave: %@ - %@", [user getUserName], [user getUserId]);
+        [[VideoZoomControl shared] sendEvent:@{
+            @"event": @"sinkMeetingUserLeft",
+            @"userID": [user getUserId],
+            @"userName": [user getUserName],
+        }];
     }
 }
 

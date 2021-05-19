@@ -27,6 +27,7 @@ typedef void(^SendEventBlock)(NSDictionary *payload);
 - (void) onOffMyVideo;
 - (void) switchMyCamera;
 - (void) getParticipants:(RCTResponseSenderBlock)callback;
+- (void) getUserInfo:(NSString *) userID callBack:(RCTResponseSenderBlock)callback;
 - (void) sendEvent:(NSDictionary *)payload;
 @end
 

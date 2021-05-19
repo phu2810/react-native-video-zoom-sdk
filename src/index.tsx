@@ -1,5 +1,10 @@
 import React from 'react';
-import { AppState, NativeModules, requireNativeComponent, NativeEventEmitter } from 'react-native';
+import {
+  AppState,
+  NativeModules,
+  requireNativeComponent,
+  NativeEventEmitter
+} from 'react-native';
 const { VideoZoomSdk } = NativeModules;
 
 const NativeVideoZoomView = requireNativeComponent('RNVideoZoomView');
@@ -56,12 +61,17 @@ export const getParticipants = () => {
   });
 }
 
-export const getUserInfoZoom = () => {
+export const getUserInfo = (userID:string) => {
+  return new Promise((res) => {
+    VideoZoomSdk.getUserInfo(userID, (info:any) => {
+      return res({error: false, info});
+    });
+  });
 }
 
 export const onEventListenerZoom = (onEvent = () => {}) =>{
   subscriptionEvent = eventEmitter.addListener(
-    'onMeetingEvent',
+    'onVideoZoomMeetingEvent',
     onEvent,
   );
 }

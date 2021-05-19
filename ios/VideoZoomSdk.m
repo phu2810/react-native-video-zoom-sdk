@@ -10,7 +10,7 @@ RCT_EXPORT_METHOD(initSDK:(RCTResponseSenderBlock)callback)
     [[VideoZoomControl shared] initSDK:callback];
     __weak VideoZoomSdk *weakSelf = self;
     [VideoZoomControl shared].sendEventBlock = ^(NSDictionary * _Nonnull payload) {
-        [weakSelf sendEventWithName:@"onMeetingEvent" body: payload];        
+        [weakSelf sendEventWithName:@"onVideoZoomMeetingEvent" body: payload];
     };
 }
 
@@ -60,7 +60,7 @@ RCT_EXPORT_METHOD(getParticipants:(RCTResponseSenderBlock)callback)
 }
 RCT_EXPORT_METHOD(getUserInfo:(NSString *)userIdStr callback:(RCTResponseSenderBlock)callback)
 {
-    //[[[ZoomInstantSDK shareInstance] getSession] getUser:userIdStr];
+    [[VideoZoomControl shared] getUserInfo:userIdStr callBack:callback];
 }
 
 RCT_EXPORT_METHOD(startObserverEvent)
@@ -83,7 +83,7 @@ RCT_EXPORT_METHOD(lowerHand)
     return dispatch_get_main_queue();
 }
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"onMeetingEvent"];
+    return @[@"onVideoZoomMeetingEvent"];
 }
 
 - (NSNumber *) getVideoRatio: (NSUInteger) userID {

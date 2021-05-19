@@ -8,7 +8,9 @@
 #import "VideoZoomControl.h"
 #import "VideoZoomEventHandler.h"
 
-@interface VideoZoomControl()<ZoomInstantSDKDelegate>
+@interface VideoZoomControl()<ZoomInstantSDKDelegate> {
+    BOOL isInitSuccess;
+}
 
 @property (nonatomic, strong) VideoZoomEventHandler *eventHandler;
 
@@ -29,23 +31,26 @@
 {
     self = [super init];
     if (self) {
+        isInitSuccess = NO;
         self.eventHandler = [VideoZoomEventHandler new];
     }
     return self;
 }
 - (void) initSDK:(RCTResponseSenderBlock)callback
 {
-    ZoomInstantSDKInitParams *context = [[ZoomInstantSDKInitParams alloc] init];
-    context.domain = @"https://zoom.us";
-    context.appGroupId = @"group.us.zoom.instantsdk";
-    context.enableLog = NO;
-    
-    ZoomInstantSDKERROR ret = [[ZoomInstantSDK shareInstance] initialize:context];
-    NSLog(@"initializeWithAppKey=====>%@", @(ret));
-    
-    NSString *version = [[ZoomInstantSDK shareInstance] getSDKVersion];
-    NSLog(@"Instant SDK version: %@", version);
-    callback(@[@(ret == 0)]);
+    if (!isInitSuccess) {
+        ZoomInstantSDKInitParams *context = [[ZoomInstantSDKInitParams alloc] init];
+        context.domain = @"https://zoom.us";
+        context.appGroupId = @"group.us.zoom.instantsdk";
+        context.enableLog = NO;
+        
+        ZoomInstantSDKERROR ret = [[ZoomInstantSDK shareInstance] initialize:context];
+        isInitSuccess = ret == 0;
+        callback(@[@(ret == 0)]);
+    }
+    else {
+        callback(@[@(1)]);
+    }
 }
 - (void) appStateChange:(NSString *) newState {
     if ([newState isEqualToString:@"inactive"]) {
@@ -59,7 +64,6 @@
     }
 }
 - (void) joinMeeting:(NSDictionary *) meetingInfo {
-    NSLog(@"+++ ok meeting info %@", meetingInfo);
     NSString *topic = meetingInfo[@"topic"] ?: @"topic";
     NSString *userName = meetingInfo[@"userName"] ?: @"userName";
     NSString *sessionPassword = meetingInfo[@"sessionPassword"] ?: @"password";
@@ -121,12 +125,12 @@
     }
 }
 - (void) onOffMyVideo {
-    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
-    if (myUser.videoStatus.on) {
-        [[[ZoomInstantSDK shareInstance] getVideoHelper] stopVideo];
-    } else {
-        [[[ZoomInstantSDK shareInstance] getVideoHelper] startVideo];
-    }
+//    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
+//    if (myUser.videoStatus.on) {
+//        [[[ZoomInstantSDK shareInstance] getVideoHelper] stopVideo];
+//    } else {
+//        [[[ZoomInstantSDK shareInstance] getVideoHelper] startVideo];
+//    }
 }
 - (void) switchMyCamera {
     [[[ZoomInstantSDK shareInstance] getVideoHelper] switchCamera];
@@ -137,10 +141,19 @@
     for (ZoomInstantSDKUser *user in userArr) {
         [listUser addObject:@{
             @"userName": [user getUserName],
-            @"userID": [user getUserId]
+            @"userID": [user getUserId],
+            @"videoStatus": @(user.videoStatus.on),
         }];
     }
     callback(@[listUser]);
+}
+- (void) getUserInfo:(NSString *) userID callBack:(RCTResponseSenderBlock)callback {
+    ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
+    callback(@[@{
+                   @"userName": [user getUserName],
+                   @"userID": [user getUserId],
+                   @"videoStatus": @(user.videoStatus.on),
+    }]);
 }
 - (void) sendEvent:(NSDictionary *)payload {
     if (self.sendEventBlock) {
