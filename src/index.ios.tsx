@@ -27,15 +27,19 @@ export const leaveCurrentMeeting = () => {
 };
 
 export const onMyAudio = () => {
+  VideoZoomSdk.onMyAudio();
 };
 
 export const offMyAudio = () => {
+  VideoZoomSdk.offMyAudio();
 };
 
 export const onAudioZoom = () => {
+  VideoZoomSdk.onMyAudio();
 };
 
 export const offAudioZoom = () => {
+  VideoZoomSdk.offMyAudio();
 };
 
 export const onOffMyVideoZoom = () => {
