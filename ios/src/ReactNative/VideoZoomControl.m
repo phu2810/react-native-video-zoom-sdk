@@ -35,6 +35,8 @@
         isInitSuccess = NO;
         listenAppState = NO;
         self.eventHandler = [VideoZoomEventHandler new];
+        self.mapActiveAudio = [NSMutableDictionary new];
+        self.mapActiveVideo = [NSMutableDictionary new];
     }
     return self;
 }
@@ -93,6 +95,9 @@
 }
 
 - (void) joinMeeting:(NSDictionary *) meetingInfo {
+    [self.mapActiveVideo removeAllObjects];
+    [self.mapActiveAudio removeAllObjects];
+    
     NSString *topic = meetingInfo[@"tpc"] ?: @"topic";
     NSString *userName = meetingInfo[@"userName"] ?: @"userName";
     NSString *sessionPassword = meetingInfo[@"pwd"] ?: @"password";
@@ -193,5 +198,17 @@
 }
 - (void) dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+- (void) checkSetHostToUser: (NSString *) userName {
+    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
+    if (myUser && [myUser isHost]) {
+        NSArray *userArr = [[[ZoomInstantSDK shareInstance] getSession] getAllUsers];
+        for (ZoomInstantSDKUser *user in userArr) {
+            if ([[user getUserName] isEqualToString:userName]) {
+                BOOL success = [[[ZoomInstantSDK shareInstance] getUserHelper] makeHost:user];
+                break;
+            }
+        }
+    }
 }
 @end

@@ -67,6 +67,10 @@ RCT_EXPORT_METHOD(stopObserverEvent)
 RCT_EXPORT_METHOD(setHostUser:(NSString *)userID)
 {
 }
+RCT_EXPORT_METHOD(checkSetHostToUser:(NSString *) userName)
+{
+    [[VideoZoomControl shared] checkSetHostToUser:userName];
+}
 RCT_EXPORT_METHOD(raiseMyHand)
 {
 }

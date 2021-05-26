@@ -1,6 +1,6 @@
 {
   "name": "react-native-video-zoom-sdk",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "react native video zoom sdk",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

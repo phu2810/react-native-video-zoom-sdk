@@ -67,9 +67,11 @@ export const onEventListenerZoom = (onEvent = () => {}) =>{
 }
 
 export const removeListenerZoom = () => {
-  subscriptionEvent.remove();
+  subscriptionEvent.removeAllListeners('onVideoZoomMeetingEvent');
 }
-
+export const checkSetHostToUser = (userName:string) => {
+  VideoZoomSdk.checkSetHostToUser(userName);
+}
 const RNVideoZoomView = (props:any) => {
   return (
     <NativeVideoZoomView

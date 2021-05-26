@@ -9,6 +9,10 @@
 #import "LogUtils.h"
 #import "VideoZoomControl.h"
 
+@interface VideoZoomEventHandler() {
+}
+
+@end
 @implementation VideoZoomEventHandler
 
 /*!
@@ -73,8 +77,8 @@
         ZoomInstantSDKUser *user = userArray[i];
         [[VideoZoomControl shared] sendEvent:@{
             @"event": @"sinkMeetingUserLeft",
-            @"userID": [user getUserId],
-            @"userName": [user getUserName],
+            @"userID": [user getUserId] ?: @"",
+            @"userName": [user getUserName] ?: @"",
             @"audioStatus": @(!user.audioStatus.isMuted),
             @"videoStatus": @(user.videoStatus.on),
         }];
@@ -90,13 +94,25 @@
     OWSLogVerbose(@"");
     for (int i = 0; i < userArray.count; i++) {
         ZoomInstantSDKUser *user = userArray[i];
-        [[VideoZoomControl shared] sendEvent:@{
-            @"event": @"sinkMeetingVideoStatusChange",
-            @"userID": [user getUserId],
-            @"userName": [user getUserName],
-            @"audioStatus": @(!user.audioStatus.isMuted),
-            @"videoStatus": @(user.videoStatus.on),
-        }];
+        NSString *userName = [user getUserName] ?: @"";
+        BOOL currentMuted = !([VideoZoomControl shared].mapActiveVideo[userName] != nil);
+        BOOL newMuted = !user.videoStatus.on;
+        if (newMuted != currentMuted) {
+            if (newMuted) {
+                [[VideoZoomControl shared].mapActiveVideo removeObjectForKey:userName];
+            }
+            else {
+                [VideoZoomControl shared].mapActiveVideo[userName] = @"";
+            }
+            
+            [[VideoZoomControl shared] sendEvent:@{
+                @"event": @"sinkMeetingVideoStatusChange",
+                @"userID": [user getUserId],
+                @"userName": [user getUserName],
+                @"audioStatus": @(!user.audioStatus.isMuted),
+                @"videoStatus": @(user.videoStatus.on),
+            }];
+        }
     }
 }
 //
@@ -109,13 +125,24 @@
     OWSLogVerbose(@"");
     for (int i = 0; i < userArray.count; i++) {
         ZoomInstantSDKUser *user = userArray[i];
-        [[VideoZoomControl shared] sendEvent:@{
-            @"event": @"sinkMeetingAudioStatusChange",
-            @"userID": [user getUserId],
-            @"userName": [user getUserName],
-            @"audioStatus": @(!user.audioStatus.isMuted),
-            @"videoStatus": @(user.videoStatus.on),
-        }];
+        NSString *userName = [user getUserName] ?: @"";
+        BOOL currentMuted = !([VideoZoomControl shared].mapActiveAudio[userName] != nil);
+        BOOL newMuted = user.audioStatus.isMuted;
+        if (newMuted != currentMuted) {
+            if (newMuted) {
+                [[VideoZoomControl shared].mapActiveAudio removeObjectForKey:userName];
+            }
+            else {
+                [VideoZoomControl shared].mapActiveAudio[userName] = @"";
+            }
+            [[VideoZoomControl shared] sendEvent:@{
+                @"event": @"sinkMeetingAudioStatusChange",
+                @"userID": [user getUserId],
+                @"userName": [user getUserName],
+                @"audioStatus": @(!user.audioStatus.isMuted),
+                @"videoStatus": @(user.videoStatus.on),
+            }];
+        }
     }
 }
 //

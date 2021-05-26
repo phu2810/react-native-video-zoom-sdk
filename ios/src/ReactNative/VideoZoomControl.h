@@ -16,6 +16,8 @@ typedef void(^SendEventBlock)(NSDictionary *payload);
 
 + (instancetype)shared;
 @property (nonatomic, copy) SendEventBlock sendEventBlock;
+@property (nonatomic, strong) NSMutableDictionary *mapActiveAudio;
+@property (nonatomic, strong) NSMutableDictionary *mapActiveVideo;
 
 - (void) initSDK:(RCTResponseSenderBlock)callback;
 - (void) joinMeeting:(NSDictionary *) meetingInfo;
@@ -28,6 +30,7 @@ typedef void(^SendEventBlock)(NSDictionary *payload);
 - (void) getParticipants:(RCTResponseSenderBlock)callback;
 - (void) getUserInfo:(NSString *) userID callBack:(RCTResponseSenderBlock)callback;
 - (void) sendEvent:(NSDictionary *)payload;
+- (void) checkSetHostToUser: (NSString *) userName;
 @end
 
 NS_ASSUME_NONNULL_END
