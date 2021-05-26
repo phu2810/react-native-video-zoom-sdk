@@ -101,7 +101,8 @@
             if (userID.length > 0) {
                 ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
                 if (user) {
-                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_PanAndScan];
+                    [[user getVideoCanvas] unSubscribeWithView:self.videoView];
+                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
                 }
             }
         }
