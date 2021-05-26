@@ -30,12 +30,19 @@
 - (void)dealloc {
 }
 
-- (void) setLastFrame: (UIImage *) image forKey:(NSString *) key {
-    [self.mapCaptures setValue:image forKey:key];
+- (void) setLastFrame: (UIImage *) image size:(CGSize) size forKey:(NSString *) key {
+    if (size.width > 0 && size.height > 0) {
+        NSString *keyMap = [NSString stringWithFormat:@"%@_%@x%@", key, @(size.width), @(size.height)];
+        [self.mapCaptures setValue:image forKey:keyMap];
+    }
 }
 
-- (UIImage *) getLastFrame: (NSString *) key {
-    return self.mapCaptures[key];
+- (UIImage *) getLastFrame: (NSString *) key withSize:(CGSize)size {
+    if (size.width > 0 && size.height > 0) {
+        NSString *keyMap = [NSString stringWithFormat:@"%@_%@x%@", key, @(size.width), @(size.height)];
+        return self.mapCaptures[keyMap];
+    }
+    return nil;
 }
 
 - (void) resetCaptures {

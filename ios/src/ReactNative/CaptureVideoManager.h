@@ -16,8 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (id)sharedManager;
 
-- (void) setLastFrame: (UIImage *) image forKey:(NSString *) key;
-- (UIImage *) getLastFrame: (NSString *) key;
+- (void) setLastFrame: (UIImage *) image size:(CGSize) size forKey:(NSString *) key;
+- (UIImage *) getLastFrame: (NSString *) key withSize:(CGSize) size;
 - (void) resetCaptures;
 
 @end

@@ -17,13 +17,11 @@
 - (void)onSessionJoin
 {
     OWSLogVerbose(@"");
-//    NSArray *userArr = [[[ZoomInstantSDK shareInstance] getSession] getAllUsers];
-//    for (int i = 0; i < userArr.count; i++) {
-//        ZoomInstantSDKUser *user = userArr[i];
-//        NSLog(@"+++ onSessionJoin: %@ - %@", [user getUserName], [user getUserId]);
-//    }
     [[VideoZoomControl shared] sendEvent:@{@"des": @"meeting_ready"}];
-    [[[ZoomInstantSDK shareInstance] getVideoHelper] rotateMyVideo:UIDeviceOrientationPortrait];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+        [[[ZoomInstantSDK shareInstance] getVideoHelper] rotateMyVideo:orientation];
+    });
 }
 
 /*!
@@ -31,7 +29,7 @@
  */
 - (void)onSessionLeave
 {
-    [[VideoZoomControl shared] sendEvent:@{@"event": @"onSessionLeave"}];
+    //[[VideoZoomControl shared] sendEvent:@{@"event": @"onSessionLeave"}];
 }
 
 /*!
@@ -41,7 +39,7 @@
  */
 - (void)onError:(ZoomInstantSDKERROR)ErrorType detail:(NSInteger)details
 {
-    [[VideoZoomControl shared] sendEvent:@{@"event": @"onError"}];
+    //[[VideoZoomControl shared] sendEvent:@{@"event": @"onError"}];
     OWSLogVerbose(@"%@ - %@", @(ErrorType), @(details));
 }
 
@@ -58,6 +56,8 @@
             @"event": @"sinkMeetingUserJoin",
             @"userID": [user getUserId],
             @"userName": [user getUserName],
+            @"audioStatus": @(!user.audioStatus.isMuted),
+            @"videoStatus": @(user.videoStatus.on),
         }];
     }
 }
@@ -75,6 +75,8 @@
             @"event": @"sinkMeetingUserLeft",
             @"userID": [user getUserId],
             @"userName": [user getUserName],
+            @"audioStatus": @(!user.audioStatus.isMuted),
+            @"videoStatus": @(user.videoStatus.on),
         }];
     }
 }
@@ -83,19 +85,39 @@
 // @brief The callback of user's video status change.
 // @param userArray Array contain userId.
 // */
-//- (void)onUserVideoStatusChanged:(ZoomInstantSDKVideoHelper *)helper user:(NSArray <ZoomInstantSDKUser *>*)userArray
-//{
-//    OWSLogVerbose(@"");
-//}
+- (void)onUserVideoStatusChanged:(ZoomInstantSDKVideoHelper *)helper user:(NSArray <ZoomInstantSDKUser *>*)userArray
+{
+    OWSLogVerbose(@"");
+    for (int i = 0; i < userArray.count; i++) {
+        ZoomInstantSDKUser *user = userArray[i];
+        [[VideoZoomControl shared] sendEvent:@{
+            @"event": @"sinkMeetingVideoStatusChange",
+            @"userID": [user getUserId],
+            @"userName": [user getUserName],
+            @"audioStatus": @(!user.audioStatus.isMuted),
+            @"videoStatus": @(user.videoStatus.on),
+        }];
+    }
+}
 //
 ///*!
 // @brief The callback of user's audio status change.
 // @param userArray Array contain userId.
 // */
-//- (void)onUserAudioStatusChanged:(ZoomInstantSDKAudioHelper *)helper user:(NSArray <ZoomInstantSDKUser *>*)userArray
-//{
-//    OWSLogVerbose(@"");
-//}
+- (void)onUserAudioStatusChanged:(ZoomInstantSDKAudioHelper *)helper user:(NSArray <ZoomInstantSDKUser *>*)userArray
+{
+    OWSLogVerbose(@"");
+    for (int i = 0; i < userArray.count; i++) {
+        ZoomInstantSDKUser *user = userArray[i];
+        [[VideoZoomControl shared] sendEvent:@{
+            @"event": @"sinkMeetingAudioStatusChange",
+            @"userID": [user getUserId],
+            @"userName": [user getUserName],
+            @"audioStatus": @(!user.audioStatus.isMuted),
+            @"videoStatus": @(user.videoStatus.on),
+        }];
+    }
+}
 //
 ///*!
 // @brief The callback of user's share status change.

@@ -60,6 +60,8 @@
          selector:@selector(applicationDidEnterBackground)
          name:UIApplicationDidEnterBackgroundNotification
          object:nil];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(deviceChangeOrientation:) name:UIDeviceOrientationDidChangeNotification object:nil];
     }
     
     if (!isInitSuccess) {
@@ -76,7 +78,10 @@
         callback(@[@(1)]);
     }
 }
-
+- (void)deviceChangeOrientation:(NSNotification *)notification {
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    [[[ZoomInstantSDK shareInstance] getVideoHelper] rotateMyVideo:orientation];
+}
 - (void) applicationWillResignActive {
     [[ZoomInstantSDK shareInstance] appWillResignActive];
 }
@@ -88,9 +93,9 @@
 }
 
 - (void) joinMeeting:(NSDictionary *) meetingInfo {
-    NSString *topic = meetingInfo[@"topic"] ?: @"topic";
+    NSString *topic = meetingInfo[@"tpc"] ?: @"topic";
     NSString *userName = meetingInfo[@"userName"] ?: @"userName";
-    NSString *sessionPassword = meetingInfo[@"sessionPassword"] ?: @"password";
+    NSString *sessionPassword = meetingInfo[@"pwd"] ?: @"password";
     NSString *token = meetingInfo[@"token"] ?: @"token";
     
     ZoomInstantSDKAudioOptions *audioOption = [ZoomInstantSDKAudioOptions new];
@@ -166,6 +171,7 @@
         [listUser addObject:@{
             @"userName": [user getUserName],
             @"userID": [user getUserId],
+            @"audioStatus": @(!user.audioStatus.isMuted),
             @"videoStatus": @(user.videoStatus.on),
         }];
     }
@@ -176,6 +182,7 @@
     callback(@[@{
                    @"userName": [user getUserName],
                    @"userID": [user getUserId],
+                   @"audioStatus": @(!user.audioStatus.isMuted),
                    @"videoStatus": @(user.videoStatus.on),
     }]);
 }

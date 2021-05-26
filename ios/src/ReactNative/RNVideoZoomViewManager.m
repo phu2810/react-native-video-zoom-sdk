@@ -50,7 +50,6 @@
     [self.lastFrameImg setHidden:YES];
     currentUserID = @"";
 }
-
 - (UIImage *)captureVideo:(UIView *)view
 {
     if (@available(iOS 10.0, *)) {
@@ -70,30 +69,40 @@
     self.lastFrameImg.frame = self.bounds;
 }
 - (void) setUserID: (NSString *) userID {
-    if (userID && ![currentUserID isEqualToString:userID]) {
-        [self unSubcribeCurrentUser];
-        if (userID.length > 0) {
-            if (timerHideLastFrame) {
-                [timerHideLastFrame invalidate];
-                timerHideLastFrame = nil;
+    if (userID) {
+        if (![currentUserID isEqualToString:userID]) {
+            [self unSubcribeCurrentUser];
+            if (userID.length > 0) {
+                if (timerHideLastFrame) {
+                    [timerHideLastFrame invalidate];
+                    timerHideLastFrame = nil;
+                }
+                UIImage *capture = [[CaptureVideoManager sharedManager] getLastFrame:userID withSize:self.bounds.size];
+                if (capture) {
+                    self.lastFrameImg.image = capture;
+                    [self.lastFrameImg setHidden:NO];
+                    timerHideLastFrame = [NSTimer scheduledTimerWithTimeInterval:1.0
+                                                                          target:self
+                                                                        selector:@selector(hideLastFrame)
+                                                                        userInfo:nil
+                                                                         repeats:NO];
+                }
+                else {
+                    [self.lastFrameImg setHidden:YES];
+                }
+                ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
+                if (user) {
+                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                    currentUserID = userID;
+                }
             }
-            UIImage *capture = [[CaptureVideoManager sharedManager] getLastFrame:userID];
-            if (capture) {
-                self.lastFrameImg.image = capture;
-                [self.lastFrameImg setHidden:NO];
-                timerHideLastFrame = [NSTimer scheduledTimerWithTimeInterval:1.0
-                                                                      target:self
-                                                                    selector:@selector(hideLastFrame)
-                                                                    userInfo:nil
-                                                                     repeats:NO];
-            }
-            else {
-                [self.lastFrameImg setHidden:YES];
-            }
-            ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
-            if (user) {
-                [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_PanAndScan];
-                currentUserID = userID;
+        }
+        else {
+            if (userID.length > 0) {
+                ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
+                if (user) {
+                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_PanAndScan];
+                }
             }
         }
     }
@@ -111,7 +120,7 @@
         if (user) {
             UIImage *capture = [self captureVideo:self.videoView];
             if (capture) {
-                [[CaptureVideoManager sharedManager] setLastFrame:capture forKey:currentUserID];
+                [[CaptureVideoManager sharedManager] setLastFrame:capture size:self.bounds.size forKey:currentUserID];
             }
             [[user getVideoCanvas] unSubscribeWithView:self.videoView];
         }
