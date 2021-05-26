@@ -56,7 +56,6 @@ const RNVideoZoomView = (props:any) => {
     <View
       // @ts-ignore
       style={props.style}
-      userID={props.userID}
     />
   );
 };
