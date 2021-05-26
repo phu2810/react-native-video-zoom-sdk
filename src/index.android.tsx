@@ -1,9 +1,5 @@
 import React from 'react';
 import {
-  NativeModules,
-  requireNativeComponent,
-  NativeEventEmitter,
-  Platform,
   View
 } from 'react-native';
 
