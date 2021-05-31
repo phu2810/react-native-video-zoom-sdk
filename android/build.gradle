@@ -54,5 +54,7 @@ repositories {
 
 dependencies {
     //noinspection GradleDynamicVersion
-    implementation "com.facebook.react:react-native:+"  // From node_modules
+    implementation "com.facebook.react:react-native:+"
+    implementation files('libs/mobilertc.aar')
+    implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
 }
