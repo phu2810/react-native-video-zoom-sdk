@@ -131,7 +131,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
   }
 
   @ReactMethod
-  public void initSdk(Callback callback) {
+  public void initSDK(Callback callback) {
     Objects.requireNonNull(context.getCurrentActivity()).runOnUiThread(() -> {
       ZoomInstantSDKInitParams params = new ZoomInstantSDKInitParams();
       if (BuildConfig.DEBUG) {
