@@ -3,23 +3,24 @@ import * as React from 'react';
 import {
   StyleSheet,
   View,
-  Text,
+  // Text,
   TextInput,
   Button,
   FlatList,
 } from 'react-native';
-import RNVideoZoomView,
-{
+import RNVideoZoomView, {
   initSdk,
   joinMeeting,
   leaveCurrentMeeting,
   getParticipants,
   onEventListenerZoom,
-  removeListenerZoom
+  removeListenerZoom,
 } from 'react-native-video-zoom-sdk';
 
 export default function App() {
-  const [token, setToken] = React.useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiRlYxamZiQTlqNmpxMkdNRFJoRDBxVGJhQkEwQ25oV3lBblcwIiwidmVyc2lvbiI6MSwiaWF0IjoxNjIxMjQwMjA5LCJleHAiOjE2MjEyNTAyMDksInVzZXJfaWRlbnRpdHkiOiIxMjM0NTYiLCJ0cGMiOiJ0b3BpYyIsInB3ZCI6IjEyMzQ1NiJ9.cYKrFQDuMRAiYbrMpTnc1av16rxlN5d54RGrsIqPVLk');
+  const [token, setToken] = React.useState(
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiRlYxamZiQTlqNmpxMkdNRFJoRDBxVGJhQkEwQ25oV3lBblcwIiwidmVyc2lvbiI6MSwiaWF0IjoxNjIxMjQwMjA5LCJleHAiOjE2MjEyNTAyMDksInVzZXJfaWRlbnRpdHkiOiIxMjM0NTYiLCJ0cGMiOiJ0b3BpYyIsInB3ZCI6IjEyMzQ1NiJ9.cYKrFQDuMRAiYbrMpTnc1av16rxlN5d54RGrsIqPVLk'
+  );
   const [topic, setTopic] = React.useState('topic');
   const [sessionPassword, setSessionPassword] = React.useState('123456');
   const [userName, setUserName] = React.useState('');
@@ -29,12 +30,12 @@ export default function App() {
   React.useEffect(() => {
     if (isSetup.current === false) {
       isSetup.current = true;
-      initSdk().then((success) => {
-        console.log("init sdk ", success);
+      initSdk().then((success: boolean) => {
+        console.log('init sdk ', success);
       });
-      onEventListenerZoom((event) => {
+      onEventListenerZoom((event: any) => {
         console.log('+++ event zoom ', event);
-      })
+      });
     }
     return () => {
       removeListenerZoom();
@@ -43,7 +44,12 @@ export default function App() {
 
   const joinMeetingCallback = React.useCallback(() => {
     setList([]);
-    joinMeeting({topic: topic, userName: userName, sessionPassword: sessionPassword, token: token});
+    joinMeeting({
+      topic: topic,
+      userName: userName,
+      sessionPassword: sessionPassword,
+      token: token,
+    });
   }, [topic, userName, sessionPassword, token]);
 
   const leaveMeeting = React.useCallback(() => {
@@ -51,16 +57,19 @@ export default function App() {
   }, []);
 
   const getParticipantsCallback = React.useCallback(() => {
-    getParticipants().then((members) => {
-      console.log("list ", members);
+    getParticipants().then((members: any) => {
+      console.log('list ', members);
       setList(members);
     });
   }, []);
 
-  const renderItem = React.useCallback(({item, index}) => {
+  const renderItem = React.useCallback(({ item }) => {
     return (
-      <View style={{height: 80, width: 80, backgroundColor: 'blue'}}>
-        <RNVideoZoomView userID={item.userID} style={{height: 80, width: 80}}/>
+      <View style={{ height: 80, width: 80, backgroundColor: 'blue' }}>
+        <RNVideoZoomView
+          userID={item.userID}
+          style={{ height: 80, width: 80 }}
+        />
       </View>
     );
   }, []);
@@ -99,23 +108,14 @@ export default function App() {
         autoCorrect={false}
         autoCompleteType={'off'}
       />
-      <Button
-        onPress={joinMeetingCallback}
-        title="Join meeting"
-      />
-      <Button
-        onPress={leaveMeeting}
-        title="Leave meeting"
-      />
-      <Button
-        onPress={getParticipantsCallback}
-        title="Get participants"
-      />
+      <Button onPress={joinMeetingCallback} title="Join meeting" />
+      <Button onPress={leaveMeeting} title="Leave meeting" />
+      <Button onPress={getParticipantsCallback} title="Get participants" />
       <FlatList
         horizontal={true}
-        keyExtractor={(item, index) => item.userID}
+        keyExtractor={(item: any) => item.userID}
         renderItem={renderItem}
-        style={{height: 80, width: 400}}
+        style={{ height: 80, width: 400 }}
         data={list}
       />
     </View>

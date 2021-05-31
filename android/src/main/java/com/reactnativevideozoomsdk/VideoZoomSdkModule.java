@@ -51,17 +51,17 @@ import us.zoom.sdk.ZoomInstantSDKUserHelper;
 import us.zoom.sdk.ZoomInstantSDKVideoHelper;
 import us.zoom.sdk.ZoomInstantSDKVideoOption;
 
-import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_AUDIO_STATUS_CHANGE;
-import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_STATE_CHANGE;
-import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_USER_JOIN;
-import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_USER_LEFT;
-import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_VIDEO_STATUS_CHANGE;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_AUDIO_STATUS;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_IS_HOST;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_USER_ID;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_USER_NAME;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_VIDEO_RATIO;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_VIDEO_STATUS;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_AUDIO_STATUS_CHANGE;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_STATE_CHANGE;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_USER_JOIN;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_USER_LEFT;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_VIDEO_STATUS_CHANGE;
 import static com.reactnativevideozoomsdk.util.ErrorMsgUtil.getMsgByErrorCode;
 import static us.zoom.sdk.ZoomInstantSDKAudioStatus.ZoomInstantSDKAudioType.ZoomInstantSDKAudioType_None;
 
@@ -131,10 +131,9 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
   }
 
   @ReactMethod
-  public void initZoomSDK(ReadableMap data, Callback callback) {
+  public void initSdk(Callback callback) {
     Objects.requireNonNull(context.getCurrentActivity()).runOnUiThread(() -> {
       ZoomInstantSDKInitParams params = new ZoomInstantSDKInitParams();
-      params.domain = data.getString("domain");
       if (BuildConfig.DEBUG) {
         params.enableLog = true;
       }
@@ -325,6 +324,11 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
       ZoomInstantSDK.getInstance().getVideoHelper().switchCamera();
       refreshRotation();
     }
+  }
+
+  @ReactMethod
+  public void checkSetHostToUser(String userName) {
+    Log.i(TAG, "checkSetHostToUser: " + userName);
   }
 
   @ReactMethod
