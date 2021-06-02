@@ -2,6 +2,7 @@ package com.reactnativevideozoomsdk.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.icu.util.TimeUnit;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,6 +17,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.TimeUtils;
 
 import com.glidebitmappool.GlideBitmapPool;
 import com.reactnativevideozoomsdk.R;
@@ -40,7 +42,6 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
   private ImageView thumbnail;
   private String userId;
   private Bitmap thumbnailBitmap;
-  private int frameWidth, frameHeight;
 
   private final Runnable screenshotTask = new Runnable() {
     @Override
@@ -50,7 +51,7 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
       } catch (Exception e) {
         Log.e(TAG, "screenshot failed", e);
       }
-      handler.postDelayed(this, 6000);
+      handler.postDelayed(this, 30000);
     }
   };
 
@@ -95,28 +96,6 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
     if (userId == null) {
       return;
     }
-    // Distract view to wait for video view fully rendered
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      // Show thumbnail is last screenshot video view
-      if (thumbnail.getDrawable() != null) {
-        thumbnail.setVisibility(VISIBLE);
-      } else {
-        // Screenshot is not taken yet, hide zoom view to show system user avatar
-        setVisibility(GONE);
-      }
-    } else {
-      // For Android below 26, screenshot thumbnail don't work well, hide zoom view to show system user avatar
-      setVisibility(GONE);
-    }
-    // Set delay time for video view show to user
-    mainHandler.postDelayed(() -> {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // Hide last screenshot thumbnail
-        thumbnail.setVisibility(GONE);
-      }
-      // Show zoom view
-      setVisibility(VISIBLE);
-    }, 1000);
     ZoomInstantSDKUser user = ZoomInstantSDK.getInstance().getSession().getUser(userId);
     if (user != null) {
       user.getVideoCanvas().subscribe(videoRenderer, ZoomInstantSDKVideoAspect.ZoomInstantSDKVideoAspect_PanAndScan);
@@ -136,13 +115,35 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
 
   @Override
   public void surfaceCreated(SurfaceHolder holder) {
-    handler.post(screenshotTask);
+    // Distract view to wait for video view fully rendered
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // Show thumbnail is last screenshot video view
+      if (thumbnail.getDrawable() != null) {
+        thumbnail.setImageBitmap(thumbnailBitmap);
+        thumbnail.setVisibility(VISIBLE);
+      } else {
+        // Screenshot is not taken yet, hide zoom view to show system user avatar
+        setVisibility(GONE);
+      }
+    } else {
+      // For Android below 26, screenshot thumbnail don't work well, hide zoom view to show system user avatar
+      setVisibility(GONE);
+    }
+    // Set delay time for video view show to user
+    mainHandler.postDelayed(() -> {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Hide last screenshot thumbnail
+        thumbnail.setVisibility(GONE);
+      }
+      // Show zoom view
+      setVisibility(VISIBLE);
+    }, 1000);
+
+    handler.postDelayed(screenshotTask, 3000);
   }
 
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-    this.frameWidth = width;
-    this.frameHeight = height;
   }
 
   @Override
@@ -151,9 +152,6 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
   }
 
   public void screenshotThumbnail() {
-    if (frameWidth == 0 || frameHeight == 0) {
-      return;
-    }
     int videoWidth = surfaceView.getWidth();
     int videoHeight = surfaceView.getHeight();
     if (thumbnailBitmap != null) {
@@ -168,7 +166,9 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
         thumbnailBitmap,
         copyResult -> {
           if (copyResult == PixelCopy.SUCCESS) {
-            thumbnail.setImageBitmap(thumbnailBitmap);
+            if (thumbnail.getDrawable() == null) {
+              thumbnail.setImageBitmap(thumbnailBitmap);
+            }
           }
         },
         copyHandler);
