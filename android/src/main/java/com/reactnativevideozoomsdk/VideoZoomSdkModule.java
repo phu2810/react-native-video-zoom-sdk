@@ -153,10 +153,10 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
 
   @ReactMethod
   public void joinMeeting(ReadableMap data) {
-    userName = data.getString(KEY_USER_NAME);
-    sessionName = data.getString(KEY_USER_NAME);
-    token = data.getString(KEY_USER_NAME);
-    password = data.getString(KEY_USER_NAME);
+    userName = data.getString("userName");
+    sessionName = data.getString("tpc");
+    token = data.getString("token");
+    password = data.getString("pwd");
 
     joinSession();
   }
