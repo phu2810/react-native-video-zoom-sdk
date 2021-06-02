@@ -20,6 +20,6 @@ public class VideoZoomSdkPackage implements ReactPackage {
     @NonNull
     @Override
     public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactContext) {
-        return Collections.singletonList(new ZoomViewManager(reactContext));
+        return Collections.singletonList(new ZoomViewManager());
     }
 }

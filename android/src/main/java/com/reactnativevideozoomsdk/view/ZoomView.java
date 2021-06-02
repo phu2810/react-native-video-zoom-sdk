@@ -9,6 +9,8 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.PixelCopy;
+import android.view.SurfaceHolder;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -18,30 +20,39 @@ import androidx.annotation.Nullable;
 import com.glidebitmappool.GlideBitmapPool;
 import com.reactnativevideozoomsdk.R;
 
-import javax.microedition.khronos.egl.EGLConfig;
-import javax.microedition.khronos.opengles.GL10;
-
 import us.zoom.internal.video.SDKVideoSurfaceView;
-import us.zoom.internal.video.SDKVideoTextureView;
-import us.zoom.internal.video.ZPGLSurfaceView;
-import us.zoom.internal.video.ZPGLTextureView;
 import us.zoom.sdk.ZoomInstantSDK;
 import us.zoom.sdk.ZoomInstantSDKUser;
 import us.zoom.sdk.ZoomInstantSDKVideoAspect;
 import us.zoom.sdk.ZoomInstantSDKVideoView;
 
-public class ZoomView extends FrameLayout implements SDKVideoTextureView.Listener, ZPGLTextureView.Renderer {
+public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
 
   private static final String TAG = "ZoomView";
 
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
+  private final Handler copyHandler = new Handler();
+  private final Handler handler = new Handler();
 
   private ZoomInstantSDKVideoView videoRenderer;
-  private ZPGLSurfaceView surfaceView;
+  private SDKVideoSurfaceView surfaceView;
 
-  private ImageView mThumbnail;
-  private String mUserId;
-  private Bitmap mThumbnailBitmap;
+  private ImageView thumbnail;
+  private String userId;
+  private Bitmap thumbnailBitmap;
+  private int frameWidth, frameHeight;
+
+  private final Runnable screenshotTask = new Runnable() {
+    @Override
+    public void run() {
+      try {
+        screenshotThumbnail();
+      } catch (Exception e) {
+        Log.e(TAG, "screenshot failed", e);
+      }
+      handler.postDelayed(this, 6000);
+    }
+  };
 
   public ZoomView(@NonNull Context context) {
     this(context, null);
@@ -58,13 +69,22 @@ public class ZoomView extends FrameLayout implements SDKVideoTextureView.Listene
   @Override
   protected void onFinishInflate() {
     super.onFinishInflate();
+    thumbnail = findViewById(R.id.thumbnail);
+
     videoRenderer = findViewById(R.id.videoView);
-    mThumbnail = findViewById(R.id.thumbnail);
+    videoRenderer.setZOrderOnTop(true);
+    videoRenderer.setZOrderMediaOverlay(true);
+
+    View view = videoRenderer.getChildAt(0);
+    if (view instanceof SDKVideoSurfaceView) {
+      surfaceView = (SDKVideoSurfaceView) view;
+      surfaceView.getHolder().addCallback(this);
+    }
   }
 
   public void setAttendeeVideoUnit(String userId) {
     if (!TextUtils.isEmpty(userId)) {
-      mUserId = userId;
+      this.userId = userId;
       addVideo();
     } else {
       removeVideo();
@@ -72,77 +92,86 @@ public class ZoomView extends FrameLayout implements SDKVideoTextureView.Listene
   }
 
   public void addVideo() {
-    if (mUserId == null) {
+    if (userId == null) {
       return;
     }
-    ZoomInstantSDKUser user = ZoomInstantSDK.getInstance().getSession().getUser(mUserId);
+    // Distract view to wait for video view fully rendered
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // Show thumbnail is last screenshot video view
+      if (thumbnail.getDrawable() != null) {
+        thumbnail.setVisibility(VISIBLE);
+      } else {
+        // Screenshot is not taken yet, hide zoom view to show system user avatar
+        setVisibility(GONE);
+      }
+    } else {
+      // For Android below 26, screenshot thumbnail don't work well, hide zoom view to show system user avatar
+      setVisibility(GONE);
+    }
+    // Set delay time for video view show to user
+    mainHandler.postDelayed(() -> {
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        // Hide last screenshot thumbnail
+        thumbnail.setVisibility(GONE);
+      }
+      // Show zoom view
+      setVisibility(VISIBLE);
+    }, 1000);
+    ZoomInstantSDKUser user = ZoomInstantSDK.getInstance().getSession().getUser(userId);
     if (user != null) {
-      user.getVideoCanvas().unSubscribe(videoRenderer);
       user.getVideoCanvas().subscribe(videoRenderer, ZoomInstantSDKVideoAspect.ZoomInstantSDKVideoAspect_PanAndScan);
     }
   }
 
   public void removeVideo() {
-    if (mUserId == null) {
+    if (userId == null) {
       return;
     }
-    ZoomInstantSDKUser user = ZoomInstantSDK.getInstance().getSession().getUser(mUserId);
-    if (user != null) {
-      user.getVideoCanvas().unSubscribe(videoRenderer);
+    ZoomInstantSDKUser user = ZoomInstantSDK.getInstance().getSession().getUser(userId);
+    if (user == null) {
+      return;
     }
+    user.getVideoCanvas().unSubscribe(videoRenderer);
+  }
+
+  @Override
+  public void surfaceCreated(SurfaceHolder holder) {
+    handler.post(screenshotTask);
+  }
+
+  @Override
+  public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    this.frameWidth = width;
+    this.frameHeight = height;
+  }
+
+  @Override
+  public void surfaceDestroyed(SurfaceHolder holder) {
+    handler.removeCallbacksAndMessages(null);
   }
 
   public void screenshotThumbnail() {
-    if (surfaceView == null) {
-      Log.e(TAG, "screenshotThumbnail: failed to get surface view");
+    if (frameWidth == 0 || frameHeight == 0) {
       return;
     }
     int videoWidth = surfaceView.getWidth();
     int videoHeight = surfaceView.getHeight();
-    if (mThumbnailBitmap != null) {
-      GlideBitmapPool.putBitmap(mThumbnailBitmap);
+    if (thumbnailBitmap != null) {
+      GlideBitmapPool.putBitmap(thumbnailBitmap);
     }
-    mThumbnailBitmap = GlideBitmapPool.getBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
+    thumbnailBitmap = GlideBitmapPool.getBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
     int[] locationOfViewInWindow = new int[2];
     surfaceView.getLocationInWindow(locationOfViewInWindow);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       PixelCopy.request(
         surfaceView,
-        mThumbnailBitmap,
+        thumbnailBitmap,
         copyResult -> {
           if (copyResult == PixelCopy.SUCCESS) {
-            mThumbnail.setImageBitmap(mThumbnailBitmap);
+            thumbnail.setImageBitmap(thumbnailBitmap);
           }
         },
-        new Handler());
-    } else {
-      // For Android below 26
-      // Zoom view will be hidden to show system user avatar
+        copyHandler);
     }
-  }
-
-  @Override
-  public void beforeGLContextDestroyed() {
-
-  }
-
-  @Override
-  public void onSurfaceDestroyed() {
-
-  }
-
-  @Override
-  public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-
-  }
-
-  @Override
-  public void onSurfaceChanged(GL10 gl10, int i, int i1) {
-
-  }
-
-  @Override
-  public void onDrawFrame(GL10 gl10) {
-
   }
 }

@@ -93,7 +93,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
 
   private final Display display;
   private final ReactContext context;
-  private final AtomicBoolean observerRegistered = new AtomicBoolean(false);
+  private final AtomicBoolean observerRegistered = new AtomicBoolean(true);
 
   private final IntentFilter filter = new IntentFilter() {{
     addAction("onConfigurationChanged");
@@ -123,7 +123,6 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
   };
 
   private String sessionName, userName, token, password;
-  private boolean hasInJoin;
 
   @ReactMethod
   public void toast(String text) {
@@ -162,9 +161,6 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
   }
 
   private void joinSession() {
-    if (hasInJoin) {
-      return;
-    }
     if (!requestPermission()) {
       return;
     }
@@ -175,6 +171,9 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     if (null == ZoomInstantSDK.getInstance()) {
       toast("Please initialize SDK");
       return;
+    }
+    if (ZoomInstantSDK.getInstance().isInSession()) {
+      Log.i(TAG, "joinSession: already in");
     }
     if (sessionName == null || userName == null || token == null || password == null) {
       toast("Missing params session");
@@ -200,7 +199,6 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     if (null == session) {
       return;
     }
-    hasInJoin = true;
   }
 
   protected boolean requestPermission() {
@@ -240,7 +238,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
       }
       array.pushMap(getUserMap(user));
     }
-    callback.invoke(null, array);
+    callback.invoke(array);
   }
 
   @ReactMethod
@@ -255,7 +253,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     }
     ZoomInstantSDKUser user = session.getUser(userId);
     if (user != null) {
-      callback.invoke(null, getUserMap(user));
+      callback.invoke(getUserMap(user));
     } else {
       Log.e(TAG, "Failed to getUserInfo: " + userId);
     }
@@ -385,6 +383,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     if (!observerRegistered.get()) {
       return;
     }
+    refreshRotation();
     sendEvent(getMeetingStateEventMap("meeting_ready"));
     startMeetingService();
   }
