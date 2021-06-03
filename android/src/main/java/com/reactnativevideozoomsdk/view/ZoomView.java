@@ -2,7 +2,6 @@ package com.reactnativevideozoomsdk.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.icu.util.TimeUnit;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -17,10 +16,12 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.TimeUtils;
 
 import com.glidebitmappool.GlideBitmapPool;
 import com.reactnativevideozoomsdk.R;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import us.zoom.internal.video.SDKVideoSurfaceView;
 import us.zoom.sdk.ZoomInstantSDK;
@@ -32,9 +33,8 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
 
   private static final String TAG = "ZoomView";
 
+  private final Executor executor = Executors.newSingleThreadExecutor();
   private final Handler mainHandler = new Handler(Looper.getMainLooper());
-  private final Handler copyHandler = new Handler();
-  private final Handler handler = new Handler();
 
   private ZoomInstantSDKVideoView videoRenderer;
   private SDKVideoSurfaceView surfaceView;
@@ -46,12 +46,8 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
   private final Runnable screenshotTask = new Runnable() {
     @Override
     public void run() {
-      try {
-        screenshotThumbnail();
-      } catch (Exception e) {
-        Log.e(TAG, "screenshot failed", e);
-      }
-      handler.postDelayed(this, 30000);
+      screenshotThumbnail();
+      mainHandler.postDelayed(this, 30000);
     }
   };
 
@@ -139,7 +135,7 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
       setVisibility(VISIBLE);
     }, 1000);
 
-    handler.postDelayed(screenshotTask, 3000);
+    mainHandler.postDelayed(screenshotTask, 3000);
   }
 
   @Override
@@ -148,30 +144,33 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
 
   @Override
   public void surfaceDestroyed(SurfaceHolder holder) {
-    handler.removeCallbacksAndMessages(null);
+    mainHandler.removeCallbacksAndMessages(null);
   }
 
   public void screenshotThumbnail() {
-    int videoWidth = surfaceView.getWidth();
-    int videoHeight = surfaceView.getHeight();
-    if (thumbnailBitmap != null) {
-      GlideBitmapPool.putBitmap(thumbnailBitmap);
-    }
-    thumbnailBitmap = GlideBitmapPool.getBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
-    int[] locationOfViewInWindow = new int[2];
-    surfaceView.getLocationInWindow(locationOfViewInWindow);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      PixelCopy.request(
-        surfaceView,
-        thumbnailBitmap,
-        copyResult -> {
-          if (copyResult == PixelCopy.SUCCESS) {
-            if (thumbnail.getDrawable() == null) {
-              thumbnail.setImageBitmap(thumbnailBitmap);
+    executor.execute(() -> {
+      int videoWidth = surfaceView.getWidth();
+      int videoHeight = surfaceView.getHeight();
+      if (thumbnailBitmap != null) {
+        GlideBitmapPool.putBitmap(thumbnailBitmap);
+      }
+      thumbnailBitmap = GlideBitmapPool.getBitmap(videoWidth, videoHeight, Bitmap.Config.ARGB_8888);
+      int[] locationOfViewInWindow = new int[2];
+      surfaceView.getLocationInWindow(locationOfViewInWindow);
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Log.d(TAG, "screenshotThumbnail: " + Thread.currentThread().getName());
+        PixelCopy.request(
+          surfaceView,
+          thumbnailBitmap,
+          copyResult -> {
+            if (copyResult == PixelCopy.SUCCESS) {
+              if (thumbnail.getDrawable() == null) {
+                mainHandler.post(() -> thumbnail.setImageBitmap(thumbnailBitmap));
+              }
             }
-          }
-        },
-        copyHandler);
-    }
+          },
+          mainHandler);
+      }
+    });
   }
 }

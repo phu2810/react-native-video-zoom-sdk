@@ -4,13 +4,14 @@ import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 
 import androidx.core.app.NotificationCompat;
-
 
 public class NotificationMgr {
 
@@ -20,17 +21,17 @@ public class NotificationMgr {
 
   public static Notification getConfNotification(Context context) {
 
-    if (context == null)
+    if (context == null) {
       return null;
+    }
 
     String contentTitle = context.getString(R.string.app_name);
     String contentText = context.getString(R.string.notification_text);
 
     int smallIcon = R.drawable.ic_launcher;
 
-    //Intent clickIntent = new Intent(context, IntegrationActivity.class);
-    //clickIntent.setAction(IntegrationActivity.ACTION_RETURN_TO_CONF);
-    //PendingIntent contentIntent = PendingIntent.getActivity(context, 0, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+    Intent clickIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+    PendingIntent contentIntent = PendingIntent.getActivity(context, 0, clickIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
     NotificationCompat.Builder builder = NotificationMgr.getNotificationCompatBuilder(context.getApplicationContext(), false);
 
@@ -40,8 +41,8 @@ public class NotificationMgr {
       .setSmallIcon(smallIcon)
       .setContentTitle(contentTitle)
       .setContentText(contentText)
-      .setOnlyAlertOnce(true);
-    //.setContentIntent(contentIntent);
+      .setOnlyAlertOnce(true)
+      .setContentIntent(contentIntent);
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       Bitmap largeIcon = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
       builder.setLargeIcon(largeIcon);

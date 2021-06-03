@@ -7,7 +7,6 @@ import android.os.IBinder;
 
 import us.zoom.sdk.ZoomInstantSDK;
 
-
 public class NotificationService extends Service {
 
   @Override
@@ -26,11 +25,9 @@ public class NotificationService extends Service {
     return super.onStartCommand(intent, flags, startId);
   }
 
-
   @Override
   public void onDestroy() {
     super.onDestroy();
-    ZoomInstantSDK.getInstance().getShareHelper().stopShare();
     ZoomInstantSDK.getInstance().leaveSession(false);
   }
 
@@ -42,8 +39,6 @@ public class NotificationService extends Service {
   public void onTaskRemoved(Intent rootIntent) {
     NotificationMgr.removeConfNotification(getApplicationContext());
     stopSelf();
-    ZoomInstantSDK.getInstance().getShareHelper().stopShare();
     ZoomInstantSDK.getInstance().leaveSession(false);
   }
-
 }

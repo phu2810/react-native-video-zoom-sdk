@@ -217,8 +217,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     if (ZoomInstantSDK.getInstance() == null) {
       return;
     }
-    int ret = ZoomInstantSDK.getInstance().leaveSession(false);
-    Log.d(TAG, "leaveSession ret = " + ret);
+    stopMeetingService();
   }
 
   @ReactMethod
