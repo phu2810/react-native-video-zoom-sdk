@@ -29,13 +29,16 @@ android {
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
-        }
+      release {
+        minifyEnabled true
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard.cfg'
+      }
     }
+
     lintOptions {
         disable 'GradleCompatible'
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
