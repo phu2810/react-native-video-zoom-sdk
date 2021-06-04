@@ -164,6 +164,8 @@
         [[[ZoomInstantSDK shareInstance] getVideoHelper] stopVideo];
     } else {
         [[[ZoomInstantSDK shareInstance] getVideoHelper] startVideo];
+        UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+        [[[ZoomInstantSDK shareInstance] getVideoHelper] rotateMyVideo:orientation];
     }
 }
 - (void) switchMyCamera {

@@ -112,6 +112,7 @@
                 @"audioStatus": @(!user.audioStatus.isMuted),
                 @"videoStatus": @(user.videoStatus.on),
             }];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"onUserVideoStatusChanged" object:nil userInfo:@{@"userID": [user getUserId]}];
         }
     }
 }

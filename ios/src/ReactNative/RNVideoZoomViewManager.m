@@ -42,6 +42,11 @@
 
 - (void)commonInit
 {
+    [[NSNotificationCenter defaultCenter] addObserver:self
+            selector:@selector(handleVideoStatusChange:)
+            name:@"onUserVideoStatusChanged"
+            object:nil];
+    
     self.videoView = [UIView new];
     self.videoView.frame = CGRectMake(0, 0, 10, 10);
     [self addSubview:self.videoView];
@@ -92,7 +97,9 @@
                 }
                 ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
                 if (user) {
-                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                    if (user.videoStatus.on) {
+                        [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                    }
                     currentUserID = userID;
                 }
             }
@@ -102,7 +109,9 @@
                 ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
                 if (user) {
                     [[user getVideoCanvas] unSubscribeWithView:self.videoView];
-                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                    if (user.videoStatus.on) {
+                        [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                    }
                 }
             }
         }
@@ -118,7 +127,7 @@
 - (void) unSubcribeCurrentUser {
     if (currentUserID.length > 0) {
         ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:currentUserID];
-        if (user) {
+        if (user && user.videoStatus.on) {
             UIImage *capture = [self captureVideo:self.videoView];
             if (capture) {
                 [[CaptureVideoManager sharedManager] setLastFrame:capture size:self.bounds.size forKey:currentUserID];
@@ -129,6 +138,7 @@
     }
 }
 - (void) dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [self unSubcribeCurrentUser];
     if (timerHideLastFrame) {
         [timerHideLastFrame invalidate];
@@ -141,6 +151,23 @@
     [_lastFrameImg removeFromSuperview];
     _lastFrameImg = nil;
 }
+- (void) handleVideoStatusChange:(NSNotification *) notification
+{
+    if ([[notification name] isEqualToString:@"onUserVideoStatusChanged"] && notification.userInfo)
+    {
+        NSString *userID = notification.userInfo[@"userID"];
+        if (currentUserID && currentUserID.length > 0 && [currentUserID isEqualToString:userID]) {
+            ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:userID];
+            if (user) {
+                [[user getVideoCanvas] unSubscribeWithView:self.videoView];
+                if (user.videoStatus.on) {
+                    [[user getVideoCanvas] subscribeWithView:self.videoView andAspectMode:ZoomInstantSDKVideoAspect_Original];
+                }
+            }
+        }
+    }
+}
+
 @end
 
 @implementation RNVideoZoomViewManager
