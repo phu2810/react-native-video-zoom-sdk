@@ -159,12 +159,12 @@
     }
 }
 - (void) onOffMyVideo {
-//    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
-//    if (myUser.videoStatus.on) {
-//        [[[ZoomInstantSDK shareInstance] getVideoHelper] stopVideo];
-//    } else {
-//        [[[ZoomInstantSDK shareInstance] getVideoHelper] startVideo];
-//    }
+    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
+    if (myUser.videoStatus.on) {
+        [[[ZoomInstantSDK shareInstance] getVideoHelper] stopVideo];
+    } else {
+        [[[ZoomInstantSDK shareInstance] getVideoHelper] startVideo];
+    }
 }
 - (void) switchMyCamera {
     [[[ZoomInstantSDK shareInstance] getVideoHelper] switchCamera];
