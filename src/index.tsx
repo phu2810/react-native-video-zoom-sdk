@@ -42,7 +42,9 @@ export const offAudioZoom = () => {
   VideoZoomSdk.offMyAudio();
 };
 
-export const onOffMyVideoZoom = () => {};
+export const onOffMyVideoZoom = () => {
+  VideoZoomSdk.onOffMyVideo();
+};
 export const switchCameraZoom = () => {};
 
 export const getParticipants = () => {
