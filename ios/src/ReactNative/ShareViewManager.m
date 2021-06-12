@@ -38,6 +38,13 @@
 }
 - (void)layoutSubviews {
     [super layoutSubviews];
+    if (currentUserID.length > 0) {
+        ZoomInstantSDKUser *user = [[[ZoomInstantSDK shareInstance] getSession] getUser:currentUserID];
+        if (user) {
+            [[user getShareCanvas] unSubscribeWithView:self];
+            [[user getShareCanvas] subscribeWithView:self andAspectMode:ZoomInstantSDKVideoAspect_Original];
+        }
+    }
 }
 - (void) setUserID: (NSString *) userID {
     if (userID) {
