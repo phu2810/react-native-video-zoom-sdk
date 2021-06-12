@@ -244,4 +244,13 @@
 //{
 //    OWSLogVerbose(@"");
 //}
+- (void)onUserShareStatusChanged:(ZoomInstantSDKShareHelper *)helper user:(ZoomInstantSDKUser *)user status:(ZoomInstantSDKReceiveSharingStatus)status {
+    OWSLogVerbose(@"+++ ok %@ - %@", [user getUserName], @(status));
+    [[VideoZoomControl shared] sendEvent:@{
+        @"event": @"sinkMeetingActiveShare",
+        @"userID": [user getUserId],
+        @"userName": [user getUserName],
+        @"shareStatus": @(status),
+    }];
+}
 @end

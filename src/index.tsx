@@ -7,6 +7,7 @@ import {
 const { VideoZoomSdk } = NativeModules;
 
 const NativeVideoZoomView = requireNativeComponent('RNVideoZoomView');
+const NativeShareViewVideoSdk = requireNativeComponent('RNShareViewVideoSdk');
 const eventEmitter = new NativeEventEmitter(VideoZoomSdk);
 let subscriptionEvent: any;
 
@@ -75,6 +76,16 @@ export const removeListenerZoom = () => {
 };
 export const checkSetHostToUser = (userName: string) => {
   VideoZoomSdk.checkSetHostToUser(userName);
+};
+
+export const RNShareViewVideoSdk = (props: any) => {
+  return (
+    <NativeShareViewVideoSdk
+      // @ts-ignore
+      style={props.style}
+      userID={props.userID}
+    />
+  );
 };
 const RNVideoZoomView = (props: any) => {
   return (

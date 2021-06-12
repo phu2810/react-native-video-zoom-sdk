@@ -178,9 +178,7 @@ RCT_EXPORT_MODULE(RNVideoZoomView)
 
 - (UIView *)view
 {
-    ZoomInstantSDKUser *myUser = [[[ZoomInstantSDK shareInstance] getSession] getMySelf];
     RNVideoZoomView *view = [[RNVideoZoomView alloc] init];
-    [view setUserID:[myUser getUserId]];
     return view;
 }
 
