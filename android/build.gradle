@@ -58,7 +58,7 @@ repositories {
 dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
-  implementation files('libs/mobilertc.aar')
+//  implementation files('libs/mobilertc.aar')
   implementation 'com.amitshekhar.android:glide-bitmap-pool:0.0.1'
   implementation "com.google.crypto.tink:tink-android:1.5.0"
   implementation "androidx.security:security-crypto:1.1.0-alpha03"
