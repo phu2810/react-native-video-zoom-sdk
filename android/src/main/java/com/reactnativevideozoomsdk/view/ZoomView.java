@@ -19,7 +19,9 @@ import androidx.annotation.Nullable;
 
 import com.glidebitmappool.GlideBitmapPool;
 import com.reactnativevideozoomsdk.R;
+import com.reactnativevideozoomsdk.SimpleZoomSDKDelegate;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -27,9 +29,10 @@ import us.zoom.internal.video.SDKVideoSurfaceView;
 import us.zoom.sdk.ZoomInstantSDK;
 import us.zoom.sdk.ZoomInstantSDKUser;
 import us.zoom.sdk.ZoomInstantSDKVideoAspect;
+import us.zoom.sdk.ZoomInstantSDKVideoHelper;
 import us.zoom.sdk.ZoomInstantSDKVideoView;
 
-public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
+public class ZoomView extends FrameLayout implements SurfaceHolder.Callback, SimpleZoomSDKDelegate {
 
   private static final String TAG = "ZoomView";
 
@@ -77,6 +80,8 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
       surfaceView = (SDKVideoSurfaceView) view;
       surfaceView.getHolder().addCallback(this);
     }
+
+    ZoomInstantSDK.getInstance().addListener(this);
   }
 
   public void setAttendeeVideoUnit(String userId) {
@@ -172,5 +177,23 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback {
           mainHandler);
       }
     });
+  }
+
+  @Override
+  public void onUserVideoStatusChanged(ZoomInstantSDKVideoHelper zoomInstantSDKVideoHelper, List<ZoomInstantSDKUser> list) {
+    if (userId == null) {
+      return;
+    }
+    for (ZoomInstantSDKUser user : list) {
+      if (!userId.equals(user.getUserId())) {
+        continue;
+      }
+      if (user.getVideoStatus().isOn()) {
+        setVisibility(VISIBLE);
+      } else {
+        setVisibility(GONE);
+      }
+      break;
+    }
   }
 }
