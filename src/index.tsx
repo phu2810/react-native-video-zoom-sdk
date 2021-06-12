@@ -9,7 +9,6 @@ const { VideoZoomSdk } = NativeModules;
 const NativeVideoZoomView = requireNativeComponent('RNVideoZoomView');
 const NativeShareViewVideoSdk = requireNativeComponent('RNShareViewVideoSdk');
 const eventEmitter = new NativeEventEmitter(VideoZoomSdk);
-let subscriptionEvent: any;
 
 export const initSdk = () => {
   return new Promise((res) => {
@@ -65,7 +64,7 @@ export const getUserInfo = (userID: string) => {
 };
 
 export const onEventListenerZoom = (onEvent = () => {}) => {
-  subscriptionEvent = eventEmitter.addListener(
+  eventEmitter.addListener(
     'onVideoZoomMeetingEvent',
     onEvent
   );
