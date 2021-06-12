@@ -46,6 +46,8 @@ import us.zoom.sdk.ZoomInstantSDKInitParams;
 import us.zoom.sdk.ZoomInstantSDKRawDataMemoryMode;
 import us.zoom.sdk.ZoomInstantSDKSession;
 import us.zoom.sdk.ZoomInstantSDKSessionContext;
+import us.zoom.sdk.ZoomInstantSDKShareHelper;
+import us.zoom.sdk.ZoomInstantSDKShareStatus;
 import us.zoom.sdk.ZoomInstantSDKUser;
 import us.zoom.sdk.ZoomInstantSDKUserHelper;
 import us.zoom.sdk.ZoomInstantSDKVideoHelper;
@@ -53,10 +55,12 @@ import us.zoom.sdk.ZoomInstantSDKVideoOption;
 
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_AUDIO_STATUS;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_IS_HOST;
+import static com.reactnativevideozoomsdk.ZoomConstants.KEY_SHARE_STATUS;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_USER_ID;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_USER_NAME;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_VIDEO_RATIO;
 import static com.reactnativevideozoomsdk.ZoomConstants.KEY_VIDEO_STATUS;
+import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_ACTIVE_SHARE;
 import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_AUDIO_STATUS_CHANGE;
 import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_STATE_CHANGE;
 import static com.reactnativevideozoomsdk.ZoomConstants.MEETING_USER_JOIN;
@@ -439,6 +443,16 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
     for (ZoomInstantSDKUser user : list) {
       sendEvent(getMeetingUserEventMap(MEETING_VIDEO_STATUS_CHANGE, user));
     }
+  }
+
+  @Override
+  public void onUserShareStatusChanged(ZoomInstantSDKShareHelper zoomInstantSDKShareHelper, ZoomInstantSDKUser user, ZoomInstantSDKShareStatus shareStatus) {
+    if (!observerRegistered.get()) {
+      return;
+    }
+    WritableMap map = getMeetingUserEventMap(MEETING_ACTIVE_SHARE, user);
+    map.putInt(KEY_SHARE_STATUS, shareStatus.ordinal());
+    sendEvent(map);
   }
 
   public WritableMap getUserMap(ZoomInstantSDKUser user) {
