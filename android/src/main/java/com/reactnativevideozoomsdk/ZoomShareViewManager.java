@@ -5,13 +5,13 @@ import androidx.annotation.NonNull;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.reactnativevideozoomsdk.view.ZoomShareView;
 
 import us.zoom.sdk.ZoomInstantSDK;
 import us.zoom.sdk.ZoomInstantSDKUser;
 import us.zoom.sdk.ZoomInstantSDKVideoAspect;
-import us.zoom.sdk.ZoomInstantSDKVideoView;
 
-public class ZoomShareViewManager extends SimpleViewManager<ZoomInstantSDKVideoView> {
+public class ZoomShareViewManager extends SimpleViewManager<ZoomShareView> {
 
   @NonNull
   @Override
@@ -21,12 +21,12 @@ public class ZoomShareViewManager extends SimpleViewManager<ZoomInstantSDKVideoV
 
   @NonNull
   @Override
-  protected ZoomInstantSDKVideoView createViewInstance(@NonNull ThemedReactContext reactContext) {
-    return new ZoomInstantSDKVideoView(reactContext);
+  protected ZoomShareView createViewInstance(@NonNull ThemedReactContext reactContext) {
+    return new ZoomShareView(reactContext);
   }
 
   @ReactProp(name = "userID")
-  public void setShareVideoUnit(ZoomInstantSDKVideoView view, String userID) {
+  public void setShareVideoUnit(ZoomShareView view, String userID) {
     if (null == ZoomInstantSDK.getInstance() || !ZoomInstantSDK.getInstance().isInSession()) {
       return;
     }
