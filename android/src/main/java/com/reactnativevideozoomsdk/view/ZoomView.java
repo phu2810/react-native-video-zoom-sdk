@@ -72,8 +72,6 @@ public class ZoomView extends FrameLayout implements SurfaceHolder.Callback, Sim
     thumbnail = findViewById(R.id.thumbnail);
 
     videoRenderer = findViewById(R.id.videoView);
-    videoRenderer.setZOrderOnTop(true);
-    videoRenderer.setZOrderMediaOverlay(true);
 
     View view = videoRenderer.getChildAt(0);
     if (view instanceof SDKVideoSurfaceView) {
