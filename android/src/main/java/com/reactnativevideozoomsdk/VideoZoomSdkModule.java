@@ -74,7 +74,7 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
 
   public static final String NAME = "VideoZoomSdk";
 
-  private final static int REQUEST_VIDEO_AUDIO_CODE = 1010;
+  private final static int REQUEST_VIDEO_AUDIO_CODE = 1020;
 
   private static final String TAG = "VideoZoomSdkModule";
 
@@ -118,7 +118,8 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
       } else if ("onRequestPermissionsResult".equals(intent.getAction())) {
         String[] permissions = intent.getStringArrayExtra("permissions");
         int[] grantResults = intent.getIntArrayExtra("grantResults");
-        if (permissions == null || grantResults == null) {
+        int requestCode = intent.getIntExtra("requestCode", -1);
+        if (permissions == null || grantResults == null || requestCode != REQUEST_VIDEO_AUDIO_CODE) {
           return;
         }
         joinSession();
@@ -173,14 +174,14 @@ public class VideoZoomSdkModule extends ReactContextBaseJavaModule implements Li
       return;
     }
     if (null == ZoomInstantSDK.getInstance()) {
-      toast("Please initialize SDK");
+      Log.e(TAG, "Please initialize SDK");
       return;
     }
     if (ZoomInstantSDK.getInstance().isInSession()) {
       Log.i(TAG, "joinSession: already in");
     }
     if (sessionName == null || userName == null || token == null || password == null) {
-      toast("Missing params session");
+      Log.e(TAG, "Missing params session");
       return;
     }
     ZoomInstantSDKSessionContext sessionContext = new ZoomInstantSDKSessionContext();
